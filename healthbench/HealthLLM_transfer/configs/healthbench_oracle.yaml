@@ -1,0 +1,39 @@
+# Cases 1 and 2 use nominal theme probabilities; Case 3 uses exact theme-language quotas.
+cases:
+  case1:
+    strata: theme
+    target_fractions:
+      communication: 0.3
+      complex_responses: 0.3
+      context_seeking: 0.95
+      emergency_referrals: 0.95
+      global_health: 0.95
+      health_data_tasks: 0.95
+      hedging: 0.3
+  case2:
+    strata: theme
+    target_fractions:
+      communication: 0.5
+      complex_responses: 0.5
+      context_seeking: 0.9
+      emergency_referrals: 0.9
+      global_health: 0.9
+      health_data_tasks: 0.9
+      hedging: 0.5
+  case3:
+    strata: theme_language
+    target_fractions:
+      communication|en: 0.05030674846625767
+      communication|non-en: 0.04807692307692308
+      complex_responses|en: 0.050156739811912224
+      complex_responses|non-en: 0.9024390243902439
+      context_seeking|en: 0.8996282527881041
+      context_seeking|non-en: 0.8928571428571429
+      emergency_referrals|en: 0.8995633187772926
+      emergency_referrals|non-en: 0.9166666666666666
+      global_health|en: 0.8998664886515354
+      global_health|non-en: 0.8994252873563219
+      health_data_tasks|en: 0.9010526315789473
+      health_data_tasks|non-en: 0.0
+      hedging|en: 0.05056179775280899
+      hedging|non-en: 0.9005524861878453

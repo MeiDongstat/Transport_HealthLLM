@@ -18,11 +18,10 @@ In the code, `B` denotes the auxiliary score and `Y` denotes the target score.
 Use Python 3.11 on Linux or macOS. The commands below assume a shell with
 Python and Git available.
 
-Download and extract `cafe-code.zip` from this repository's **Releases**
-section. It contains the code and numeric inputs for both the simulation
-and HealthBench experiments. If using a Git clone, copy `simulation/data/`
-and `healthbench/HealthLLM_transfer/data/` from the release archive into the
-corresponding directories in the clone.
+Clone the repository's `main` branch, or download and extract `cafe-code.zip`
+from **Releases**. Both contain the code and numeric inputs for the simulation
+and HealthBench experiments. Data are in `simulation/data/` and
+`healthbench/HealthLLM_transfer/data/`.
 
 All paths below are relative to the project root, which contains
 `healthbench/` and `simulation/`. Use separate Python environments for the
@@ -116,7 +115,7 @@ before running these experiments.
 
 ### Required data
 
-The release archive includes GPT-4.1 and Gemini Flash Lite evaluator scores,
+The repository includes GPT-4.1 and Gemini Flash Lite evaluator scores,
 500 source/target splits for each of the three cases, full BGE-M3 embeddings,
 and PC30, PC50, PC80, and PC95 representations. The benchmark and its data
 documentation are available from [HealthBench](https://github.com/openai/healthbench).
@@ -140,11 +139,39 @@ complete-case rules.
 
 The CAFE comparisons use the PC50 prompt-plus-rubric representation
 (80 features). The reweighting comparisons also use the other representation
-levels listed above. Preparation utilities are in
-`HealthLLM_transfer/code/experiment_perp/` and
-`HealthLLM_transfer/code/representation/`. Embedding and language preparation
+levels listed above. Embedding and language preparation utilities are in
+`HealthLLM_transfer/code/representation/`. These utilities
 require the additional dependencies installed by
 `python -m pip install -e '.[representation]'`.
+
+### Baseline and oracle
+
+Baseline is the unweighted source-score mean. Oracle uses known selection
+probabilities to calculate source weights and complete-case weighted means.
+Its probabilities are stored in
+`HealthLLM_transfer/configs/healthbench_oracle.yaml`: Cases 1 and 2 use nominal
+theme probabilities; Case 3 uses the realized fixed-quota probabilities for
+each theme and English/non-English stratum.
+
+From `healthbench/`, run Case 1, split 1 with GPT-4.1 evaluator scores:
+
+```bash
+python HealthLLM_transfer/code/evaluation/calculate_baseline.py \
+  --metadata HealthLLM_transfer/data/healthbench/healthbench_metadata_gpt4.1.npz \
+  --case case1 --n-splits 1 --output-dir outputs/gpt41
+
+python HealthLLM_transfer/code/evaluation/calculate_oracle.py \
+  --metadata HealthLLM_transfer/data/healthbench/healthbench_metadata_gpt4.1.npz \
+  --config HealthLLM_transfer/configs/healthbench_oracle.yaml \
+  --case case1 --n-splits 1 --output-dir outputs/gpt41
+```
+
+Scores are saved under `outputs/gpt41/case1/`, and Oracle generates its
+weights under `outputs/gpt41/weights/case1/`. Omit `--n-splits` to run all 500
+splits; `--case case1 case2 case3` runs all three cases. To use Gemini Flash
+Lite scores, select `healthbench_metadata_flashlite.npz` and a separate output
+directory. These two calculations require only the base installation,
+`python -m pip install -e .`.
 
 ### Run CAFE and the comparison methods
 
@@ -208,6 +235,7 @@ Weights and reweighted scores are saved to the paths in the configuration.
 
 | Experiment | Methods |
 | --- | --- |
+| Source-score comparison | Unweighted baseline, known-selection oracle |
 | Same evaluator | Target-label mean, PPI++, target-only AIPW, pooled-label AIPW, pooled-label DR, CAFE |
 | Different evaluators | Target-label mean, PPI++, RePPI, target-only AIPW, CAFE |
 | Embedding reweighting | KMM, uLSIF, RuLSIF, KLIEP |
@@ -225,17 +253,18 @@ healthbench/
   HealthLLM_transfer/
     code/                 Estimators, data preparation, and experiment drivers
     configs/              HealthBench experiment settings
+    data/                 Evaluator scores, representations, and fixed splits
   src/meta_eval/          Configuration and result-management utilities
   pyproject.toml
 simulation/
   cafe_sim/               Simulation generation, execution, and collection
   configs/estimators/     Simulation estimator settings
-  data/                  Numeric inputs supplied in the release archive
+  data/                  Numeric simulation inputs and fixed splits
   requirements.txt
   release_manifest.json
 ```
 
-`MANIFEST.json` lists the release contents. `healthbench/MANIFEST.json` records
+`MANIFEST.json` lists the distributed files. `healthbench/MANIFEST.json` records
 HealthBench data checksums and source information.
 `simulation/release_manifest.json` records checksums for simulation inputs
 and required source files.
@@ -243,7 +272,7 @@ and required source files.
 ## Data sources
 
 The task representations and reference evaluation scores derive from
-[HealthBench](https://github.com/openai/healthbench). The release archive
+[HealthBench](https://github.com/openai/healthbench). The repository
 contains numeric representations and scores without prompt or rubric text.
 Third-party data, models, and dependencies remain subject to their respective
 licenses and access terms.

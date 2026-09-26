@@ -7,7 +7,7 @@ import numpy as np
 
 HEALTHLLM_TRANSFER_ROOT = Path(__file__).resolve().parents[2]
 SPLIT_PATH = HEALTHLLM_TRANSFER_ROOT / "data/healthbench/embedding/healthbench_splits.npz"
-METADATA_PATH = HEALTHLLM_TRANSFER_ROOT / "data/healthbench/healthbench_metadata.npz"
+METADATA_PATH = HEALTHLLM_TRANSFER_ROOT / "data/healthbench/healthbench_metadata_gpt4.1.npz"
 CASES = ("case1", "case2", "case3")
 
 
@@ -92,6 +92,7 @@ def main() -> None:
     """Calculate and save baseline scores for the selected cases."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--metadata", type=Path, required=True, help="Input metadata NPZ.")
+    parser.add_argument("--n-splits", type=int, default=500, help="Number of splits, starting at split 1.")
     parser.add_argument(
         "--output-dir", type=Path, required=True, help="Score directory containing case subdirectories."
     )
@@ -105,6 +106,10 @@ def main() -> None:
     args = parser.parse_args()
     cases = tuple(args.case)
     model, seeds, final_score, target_masks = load_inputs(cases, metadata_path=args.metadata)
+    if not 1 <= args.n_splits <= len(seeds):
+        parser.error(f"--n-splits must be between 1 and {len(seeds)}")
+    seeds = seeds[:args.n_splits]
+    target_masks = target_masks[:, :args.n_splits]
 
     for case_index, case in enumerate(cases):
         case_target_masks = target_masks[case_index]

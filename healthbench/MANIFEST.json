@@ -34,7 +34,7 @@
         "size_bytes": 76350
       }
     },
-    "retrieval": "Extract cafe-code.zip from the repository Releases page.",
+    "retrieval": "Included in the main branch and in cafe-code.zip from Releases.",
     "sample_count": 5000,
     "sample_id_format": "task_00001 through task_05000",
     "source": {
@@ -78,14 +78,12 @@
     "HealthLLM_transfer/code/evaluation/run_transport_pairedscore_batch.py",
     "HealthLLM_transfer/code/evaluation/summarize_transport_paired.py",
     "HealthLLM_transfer/code/evaluation/validate_reweighting_outputs.py",
-    "HealthLLM_transfer/code/experiment_perp/generate_metadata.py",
-    "HealthLLM_transfer/code/experiment_perp/generate_splits.py",
     "HealthLLM_transfer/code/representation/generate_healthbench_bge_m3_pca.py",
     "HealthLLM_transfer/code/representation/generate_healthbench_embeddings.py",
     "HealthLLM_transfer/code/representation/healthbench_language_generate.py",
-    "HealthLLM_transfer/configs/healthbench_case3_splits.yaml",
     "HealthLLM_transfer/configs/healthbench_domain_classifier.yaml",
     "HealthLLM_transfer/configs/healthbench_kernel_methods.yaml",
+    "HealthLLM_transfer/configs/healthbench_oracle.yaml",
     "HealthLLM_transfer/configs/healthbench_predicted_theme_plus_embedding_reweighting.yaml",
     "HealthLLM_transfer/configs/healthbench_predicted_theme_reweighting.yaml",
     "HealthLLM_transfer/configs/healthbench_transport_b_equals_y.yaml",

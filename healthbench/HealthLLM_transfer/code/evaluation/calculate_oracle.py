@@ -5,17 +5,18 @@ import sys
 from pathlib import Path
 
 import numpy as np
+import yaml
 
 HEALTHLLM_TRANSFER_ROOT = Path(__file__).resolve().parents[2]
 CODE_ROOT = HEALTHLLM_TRANSFER_ROOT / "code"
 if str(CODE_ROOT) not in sys.path:
     sys.path.insert(0, str(CODE_ROOT))
 
-from covariateshift.oracle import selection_design_raw_weights
-from evaluation.reweighting_execution import expected_source_indices, recompute_scores
+from covariateshift.oracle import selection_design_raw_weights, theme_language_strata
 
 SPLIT_PATH = HEALTHLLM_TRANSFER_ROOT / "data/healthbench/embedding/healthbench_splits.npz"
-METADATA_PATH = HEALTHLLM_TRANSFER_ROOT / "data/healthbench/healthbench_metadata.npz"
+METADATA_PATH = HEALTHLLM_TRANSFER_ROOT / "data/healthbench/healthbench_metadata_gpt4.1.npz"
+CONFIG_PATH = HEALTHLLM_TRANSFER_ROOT / "configs/healthbench_oracle.yaml"
 CASES = ("case1", "case2", "case3")
 
 
@@ -172,44 +173,19 @@ def save_oracle_scores(
     score_temporary.replace(path)
 
 
-def rescore_oracle_case(
-    weight_path: Path,
-    *,
-    case: str,
-    seeds: np.ndarray,
-    final_score: np.ndarray,
-    target_masks: np.ndarray,
-) -> dict[str, np.ndarray]:
-    """Return oracle scores from saved weights aligned to the requested splits."""
-    with np.load(weight_path, allow_pickle=False) as saved:
-        if str(saved["case"].item()) != case or str(saved["method"].item()) != "oracle":
-            raise ValueError(f"Oracle weight identity differs: {weight_path}")
-        if not np.array_equal(saved["seed"][: len(seeds)], seeds) or not np.array_equal(
-            saved["split_id"][: len(seeds)], np.arange(1, len(seeds) + 1)
-        ):
-            raise ValueError(f"Oracle weight splits or seeds differ: {weight_path}")
-        source_indices = expected_source_indices(target_masks, len(seeds))
-        if not np.array_equal(saved["source_indices"][: len(seeds)], source_indices):
-            raise ValueError(f"Oracle source rows differ: {weight_path}")
-        weights = saved["weights"][: len(seeds)].astype(np.float64)
-    if weights.shape != source_indices.shape or not np.isfinite(weights).all() or np.any(weights < 0):
-        raise ValueError(f"Invalid oracle weights: {weight_path}")
-    reweighted_scores, complete = recompute_scores(final_score, source_indices, weights)
-    return {"reweighted_scores": reweighted_scores[:, 0], "n_source_complete": complete}
-
-
 def main() -> None:
-    """Recompute oracle scores from saved weights for the selected metadata."""
+    """Generate oracle weights and scores from configured selection probabilities."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--metadata", type=Path, required=True, help="Input metadata NPZ.")
+    parser.add_argument("--config", type=Path, default=CONFIG_PATH, help="Oracle selection probabilities.")
+    parser.add_argument("--n-splits", type=int, default=500, help="Number of splits, starting at split 1.")
     parser.add_argument(
         "--output-dir", type=Path, required=True, help="Score directory containing case subdirectories."
     )
     parser.add_argument(
         "--weights-dir",
         type=Path,
-        default=HEALTHLLM_TRANSFER_ROOT / "weights",
-        help="Existing oracle-weight directory containing case subdirectories.",
+        help="Output weight directory; defaults to OUTPUT_DIR/weights.",
     )
     parser.add_argument(
         "--case",
@@ -220,19 +196,30 @@ def main() -> None:
     )
     args = parser.parse_args()
     cases = tuple(args.case)
-    model, seeds, final_score, target_masks, _, _ = load_inputs(cases, metadata_path=args.metadata)
+    model, seeds, final_score, target_masks, themes, languages = load_inputs(
+        cases, metadata_path=args.metadata
+    )
+    if not 1 <= args.n_splits <= len(seeds):
+        parser.error(f"--n-splits must be between 1 and {len(seeds)}")
+    seeds = seeds[:args.n_splits]
+    target_masks = target_masks[:, :args.n_splits]
+    with args.config.open(encoding="utf-8") as handle:
+        config = yaml.safe_load(handle)
+    strata = {"theme": themes, "theme_language": theme_language_strata(themes, languages)}
+    weights_dir = args.weights_dir if args.weights_dir is not None else args.output_dir / "weights"
 
     for case_index, case in enumerate(cases):
-        weight_path = args.weights_dir / case / "oracle_weights.npz"
+        case_config = config["cases"][case]
+        weight_path = weights_dir / case / "oracle_weights.npz"
         score_path = args.output_dir / case / "oracle_reweighted_scores.npz"
-        payload = rescore_oracle_case(
-            weight_path,
-            case=case,
-            seeds=seeds,
-            final_score=final_score,
-            target_masks=target_masks[case_index],
+        payload = calculate_oracle_case(
+            final_score,
+            strata[case_config["strata"]],
+            target_masks[case_index],
+            case_config["target_fractions"],
         )
-        save_oracle_scores(
+        save_oracle_case(
+            weight_path,
             score_path,
             case=case,
             model=model,

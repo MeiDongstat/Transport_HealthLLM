@@ -19,3 +19,6 @@ models/
 *.jsonl
 *.ckpt
 *.zip
+!HealthLLM_transfer/data/
+!HealthLLM_transfer/data/**/
+!HealthLLM_transfer/data/**/*.npz

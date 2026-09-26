@@ -3,6 +3,7 @@ __pycache__/
 .venv*/
 .DS_Store
 **/data/**/*.npz
+!/simulation/data/**/*.npz
 **/outputs/
 **/results/
 *.zip
