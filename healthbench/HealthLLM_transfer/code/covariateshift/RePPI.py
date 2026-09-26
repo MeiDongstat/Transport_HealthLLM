@@ -1,9 +1,6 @@
 """Three-fold recalibrated prediction-powered estimation of a target mean.
 
 Target labels are sampled randomly from the target population. Fixed source predictions must be learned independently of these labels. Recalibration uses target covariates together with the fixed prediction; each supplied regressor fits its preprocessing on its training fold only.
-
-The scalar mean specialization follows Ji, Lei and Zrnic (2025), RePPI:
-https://github.com/Wenlong2000/RePPI/blob/main/reppi.py
 """
 
 from __future__ import annotations

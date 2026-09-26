@@ -234,12 +234,10 @@ simulation/
 `MANIFEST.json` lists the release contents. `simulation/release_manifest.json`
 records checksums for simulation inputs and required source files.
 
-## Data and references
+## Data sources
 
 The task representations and reference evaluation scores derive from
 [HealthBench](https://github.com/openai/healthbench). The simulation archive
-contains numeric arrays without prompt or rubric text. The RePPI scalar-mean
-implementation follows Ji, Lei, and Zrnic (2025); see the
-[RePPI repository](https://github.com/Wenlong2000/RePPI).
+contains numeric arrays without prompt or rubric text.
 Third-party data, models, and dependencies remain subject to their respective
 licenses and access terms.
