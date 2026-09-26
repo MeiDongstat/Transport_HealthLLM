@@ -3,7 +3,7 @@ requires = ["setuptools>=68", "wheel"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "iclr-healthbench-cafe"
+name = "healthbench-cafe"
 version = "0.1.0"
 description = "HealthBench task-shift and evaluator-shift core estimation experiments."
 requires-python = ">=3.11"
