@@ -1,0 +1,107 @@
+{
+  "same_evaluator": {
+    "scenario": "B_equals_Y",
+    "correlation": {
+      "actual_correlation": 1.0,
+      "common_random_numbers": true,
+      "protocol": "equal_scores",
+      "rho_original": 0.7512947088740821,
+      "rho_used": null,
+      "target_correlation": null,
+      "target_kind": "empirical_fixed_dataset_pearson",
+      "tolerance": 0.0001
+    },
+    "generation_seed": 2195094408,
+    "shrinkage": 0.5
+  },
+  "corr_040": {
+    "scenario": "B_not_equals_Y",
+    "correlation": {
+      "absolute_error": 4.835518990775611e-08,
+      "actual_correlation": 0.40000004835518993,
+      "common_random_numbers": true,
+      "conditional_truth": "unchanged fitted conditional means",
+      "endpoint_correlations": [
+        -0.6215067411209244,
+        0.9463094657081963
+      ],
+      "note": "Targets describe the realized fixed dataset, not population correlation. Only latent error rho changes; score maps, conditional marginal laws, X, and Gaussian error draws are shared. No split or domain mask is used.",
+      "objective_evaluations": 39,
+      "original_correlation": 0.7760855011106623,
+      "preferred_tolerance": 1e-06,
+      "preferred_tolerance_met": true,
+      "protocol": "fixed_sample_pearson_common_random_numbers_v1",
+      "rho_bounds": [
+        -0.95,
+        0.95
+      ],
+      "rho_original": 0.7512947088740821,
+      "rho_used": 0.29422821284797085,
+      "target_correlation": 0.4,
+      "target_kind": "empirical_fixed_dataset_pearson",
+      "tolerance": 0.0001
+    },
+    "generation_seed": 2195094408,
+    "shrinkage": 0.5
+  },
+  "corr_060": {
+    "scenario": "B_not_equals_Y",
+    "correlation": {
+      "absolute_error": 6.310313871438211e-08,
+      "actual_correlation": 0.6000000631031387,
+      "common_random_numbers": true,
+      "conditional_truth": "unchanged fitted conditional means",
+      "endpoint_correlations": [
+        -0.6215067411209244,
+        0.9463094657081963
+      ],
+      "note": "Targets describe the realized fixed dataset, not population correlation. Only latent error rho changes; score maps, conditional marginal laws, X, and Gaussian error draws are shared. No split or domain mask is used.",
+      "objective_evaluations": 44,
+      "original_correlation": 0.7760855011106623,
+      "preferred_tolerance": 1e-06,
+      "preferred_tolerance_met": true,
+      "protocol": "fixed_sample_pearson_common_random_numbers_v1",
+      "rho_bounds": [
+        -0.95,
+        0.95
+      ],
+      "rho_original": 0.7512947088740821,
+      "rho_used": 0.5407133470654789,
+      "target_correlation": 0.6,
+      "target_kind": "empirical_fixed_dataset_pearson",
+      "tolerance": 0.0001
+    },
+    "generation_seed": 2195094408,
+    "shrinkage": 0.5
+  },
+  "corr_080": {
+    "scenario": "B_not_equals_Y",
+    "correlation": {
+      "absolute_error": 4.1181200249873484e-07,
+      "actual_correlation": 0.8000004118120025,
+      "common_random_numbers": true,
+      "conditional_truth": "unchanged fitted conditional means",
+      "endpoint_correlations": [
+        -0.6215067411209244,
+        0.9463094657081963
+      ],
+      "note": "Targets describe the realized fixed dataset, not population correlation. Only latent error rho changes; score maps, conditional marginal laws, X, and Gaussian error draws are shared. No split or domain mask is used.",
+      "objective_evaluations": 38,
+      "original_correlation": 0.7760855011106623,
+      "preferred_tolerance": 1e-06,
+      "preferred_tolerance_met": true,
+      "protocol": "fixed_sample_pearson_common_random_numbers_v1",
+      "rho_bounds": [
+        -0.95,
+        0.95
+      ],
+      "rho_original": 0.7512947088740821,
+      "rho_used": 0.7799073895843148,
+      "target_correlation": 0.8,
+      "target_kind": "empirical_fixed_dataset_pearson",
+      "tolerance": 0.0001
+    },
+    "generation_seed": 2195094408,
+    "shrinkage": 0.5
+  }
+}

@@ -1,0 +1,74 @@
+{
+  "density_ratio": {
+    "median_max_points": 2000,
+    "method": {
+      "B": 1000,
+      "cv": 5,
+      "eps": null,
+      "gamma_multipliers": [
+        0.25,
+        1.0,
+        4.0
+      ],
+      "max_iter": 100,
+      "max_size": null,
+      "name": "kmm"
+    }
+  },
+  "cafe": {
+    "lambda_a": [
+      0.0001,
+      0.001,
+      0.01
+    ],
+    "median_max_points": 2000,
+    "n_inner_folds": 3
+  },
+  "methods": [
+    {
+      "name": "labelled_only"
+    },
+    {
+      "name": "ppi"
+    },
+    {
+      "name": "reppi"
+    },
+    {
+      "name": "aipw"
+    },
+    {
+      "name": "cafe"
+    }
+  ],
+  "models": [
+    "GPT-5.4",
+    "Gemini 3.1 Pro",
+    "Gemini 3.1 Pro (Large Context)",
+    "Claude Opus 4.6",
+    "Gemini 2.5 Flash"
+  ],
+  "regression": {
+    "alphas": [
+      0.0001,
+      0.001,
+      0.01,
+      0.1,
+      1.0,
+      10.0,
+      100.0,
+      1000.0,
+      10000.0
+    ],
+    "n_folds": 3,
+    "name": "ridge"
+  },
+  "split": {
+    "label_counts": [
+      200,
+      300,
+      500
+    ],
+    "n_folds": 5
+  }
+}

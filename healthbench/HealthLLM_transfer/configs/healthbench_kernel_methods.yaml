@@ -1,0 +1,150 @@
+experiment_id: healthbench-kernel-based-methods
+paths:
+  split: data/healthbench/embedding/healthbench_splits.npz
+  scores: data/healthbench/healthbench_metadata_gpt4.1.npz
+  checkpoint_scores_dir: checkpoints/kernel_based_methods/reweighted_scores
+  checkpoint_weights_dir: checkpoints/kernel_based_methods/weights
+  reweighted_scores_dir: reweighted_scores
+  weights_dir: weights
+execution:
+  n_splits: 500
+  batch_size: 25
+  median_max_points: 2000
+cases:
+- name: case1
+  target_mask: all_case1_target
+- name: case2
+  target_mask: all_case2_target
+- name: case3
+  target_mask: all_case3_target
+representations:
+  full:
+    path: data/healthbench/embedding/healthbench_bge_m3_embeddings.npz
+    blocks:
+      p: prompt_embeddings
+      r: rubric_embeddings
+      i: rubric_information
+  pca30:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca30_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca50:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca50_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca80:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca80_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca95:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca95_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+feature_sets:
+- name: full_p
+  representation: full
+  blocks:
+  - p
+  expected_dimension: 1024
+- name: full_p_r
+  representation: full
+  blocks:
+  - p
+  - r
+  expected_dimension: 2048
+- name: pca30_p
+  representation: pca30
+  blocks:
+  - p
+  expected_dimension: 20
+- name: pca30_p_r
+  representation: pca30
+  blocks:
+  - p
+  - r
+  expected_dimension: 28
+- name: pca50_p
+  representation: pca50
+  blocks:
+  - p
+  expected_dimension: 58
+- name: pca50_p_r
+  representation: pca50
+  blocks:
+  - p
+  - r
+  expected_dimension: 80
+- name: pca80_p
+  representation: pca80
+  blocks:
+  - p
+  expected_dimension: 191
+- name: pca80_p_r
+  representation: pca80
+  blocks:
+  - p
+  - r
+  expected_dimension: 300
+- name: pca95_p
+  representation: pca95
+  blocks:
+  - p
+  expected_dimension: 377
+- name: pca95_p_r
+  representation: pca95
+  blocks:
+  - p
+  - r
+  expected_dimension: 662
+methods:
+- name: ulsif
+  n_centers: 200
+  lambdas:
+  - 0.001
+  - 0.01
+  - 0.1
+  - 1.0
+  - 10.0
+  gamma_multipliers:
+  - 0.25
+  - 1.0
+  - 4.0
+- name: rulsif
+  n_centers: 200
+  lambda:
+  - 0.001
+  - 0.01
+  - 0.1
+  - 1.0
+  - 10.0
+  gamma_multipliers:
+  - 0.25
+  - 1.0
+  - 4.0
+  rulsif_alpha: 0.1
+- name: kliep
+  n_centers: 200
+  gamma_multipliers:
+  - 0.25
+  - 1.0
+  - 4.0
+  cv: 5
+  algo: FW
+  max_iter: 2000
+- name: kmm
+  gamma_multipliers:
+  - 0.25
+  - 1.0
+  - 4.0
+  cv: 5
+  B: 1000
+  eps: null
+  max_size: null
+  max_iter: 100

@@ -1,0 +1,122 @@
+experiment_id: healthbench-domain-classifier
+paths:
+  split: data/healthbench/embedding/healthbench_splits.npz
+  scores: data/healthbench/healthbench_metadata_gpt4.1.npz
+  batch_output_dir: reweighted_scores/domain_classifier/checkpoints
+  smoke_output_dir: reweighted_scores/domain_classifier/smoke
+  final_output_dir: reweighted_scores
+  final_weights_filename: domain_classifier_weights.npz
+  final_scores_filename: domain_classifier_reweighted_scores.npz
+execution:
+  n_splits: 500
+  batch_size: 25
+  smoke_split_id: 1
+cross_fitting:
+  n_folds: 5
+cases:
+- name: case1
+  target_mask: all_case1_target
+- name: case2
+  target_mask: all_case2_target
+- name: case3
+  target_mask: all_case3_target
+representations:
+  full:
+    path: data/healthbench/embedding/healthbench_bge_m3_embeddings.npz
+    blocks:
+      p: prompt_embeddings
+      r: rubric_embeddings
+      i: rubric_information
+  pca30:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca30_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca50:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca50_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca80:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca80_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca95:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca95_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+feature_sets:
+- name: full_p
+  representation: full
+  blocks:
+  - p
+  expected_dimension: 1024
+- name: full_p_r
+  representation: full
+  blocks:
+  - p
+  - r
+  expected_dimension: 2048
+- name: pca30_p
+  representation: pca30
+  blocks:
+  - p
+  expected_dimension: 20
+- name: pca30_p_r
+  representation: pca30
+  blocks:
+  - p
+  - r
+  expected_dimension: 28
+- name: pca50_p
+  representation: pca50
+  blocks:
+  - p
+  expected_dimension: 58
+- name: pca50_p_r
+  representation: pca50
+  blocks:
+  - p
+  - r
+  expected_dimension: 80
+- name: pca80_p
+  representation: pca80
+  blocks:
+  - p
+  expected_dimension: 191
+- name: pca80_p_r
+  representation: pca80
+  blocks:
+  - p
+  - r
+  expected_dimension: 300
+- name: pca95_p
+  representation: pca95
+  blocks:
+  - p
+  expected_dimension: 377
+- name: pca95_p_r
+  representation: pca95
+  blocks:
+  - p
+  - r
+  expected_dimension: 662
+methods:
+- name: tabpfn_domain_classifier
+  model_id: PriorLabs/TabPFN
+  model_revision: ModelVersion.V3
+  model_version: V3
+  checkpoint_env: TABPFN_CLASSIFIER_CHECKPOINT
+  device: cuda
+  n_estimators: 8
+  auto_scale_n_estimators: false
+  softmax_temperature: 0.9
+  ignore_pretraining_limits: true
+  inference_precision: float32
+  fit_mode: fit_preprocessors
+  probability_clip: null

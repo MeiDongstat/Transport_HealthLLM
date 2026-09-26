@@ -1,0 +1,137 @@
+base_config: healthbench_kernel_methods.yaml
+experiment_id: healthbench-predicted-theme-plus-embedding-reweighting
+paths:
+  batch_output_dir: reweighted_scores/predicted_theme_plus_embedding/checkpoints
+  smoke_output_dir: reweighted_scores/predicted_theme_plus_embedding/smoke
+  final_output_dir: reweighted_scores
+  final_weights_filename: predicted_theme_plus_embedding_weights.npz
+  final_scores_filename: predicted_theme_plus_embedding_reweighted_scores.npz
+execution:
+  smoke_split_id: 1
+  n_splits: 500
+cross_fitting:
+  n_folds: 5
+cases:
+- name: case1
+  target_mask: all_case1_target
+- name: case2
+  target_mask: all_case2_target
+- name: case3
+  target_mask: all_case3_target
+theme_labels:
+- communication
+- complex_responses
+- context_seeking
+- emergency_referrals
+- global_health
+- health_data_tasks
+- hedging
+representations:
+  full:
+    path: data/healthbench/embedding/healthbench_bge_m3_embeddings.npz
+    blocks:
+      p: prompt_embeddings
+      r: rubric_embeddings
+      i: rubric_information
+  pca30:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca30_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca50:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca50_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca80:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca80_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+      i: rubric_information
+  pca95:
+    path: data/healthbench/embedding/healthbench_bge_m3_pca95_embeddings.npz
+    blocks:
+      p: prompt_pcs
+      r: rubric_pcs
+feature_sets:
+- name: full_p
+  representation: full
+  blocks:
+  - p
+  expected_dimension: 1024
+- name: full_p_r
+  representation: full
+  blocks:
+  - p
+  - r
+  expected_dimension: 2048
+- name: pca30_p
+  representation: pca30
+  blocks:
+  - p
+  expected_dimension: 20
+- name: pca30_p_r
+  representation: pca30
+  blocks:
+  - p
+  - r
+  expected_dimension: 28
+- name: pca50_p
+  representation: pca50
+  blocks:
+  - p
+  expected_dimension: 58
+- name: pca50_p_r
+  representation: pca50
+  blocks:
+  - p
+  - r
+  expected_dimension: 80
+- name: pca80_p
+  representation: pca80
+  blocks:
+  - p
+  expected_dimension: 191
+- name: pca80_p_r
+  representation: pca80
+  blocks:
+  - p
+  - r
+  expected_dimension: 300
+- name: pca95_p
+  representation: pca95
+  blocks:
+  - p
+  expected_dimension: 377
+- name: pca95_p_r
+  representation: pca95
+  blocks:
+  - p
+  - r
+  expected_dimension: 662
+theme_classifier:
+  model_id: PriorLabs/TabPFN
+  model_revision: ModelVersion.V3
+  model_version: V3
+  device: cuda
+  n_estimators: 8
+  auto_scale_n_estimators: false
+  softmax_temperature: 0.9
+  ignore_pretraining_limits: true
+  inference_precision: float32
+  fit_mode: fit_preprocessors
+methods:
+- name: kmm
+  scorer_bandwidth: target_mean_distance
+  gamma_multipliers:
+  - 0.25
+  - 1.0
+  - 4.0
+  cv: 5
+  B: 1000
+  eps: null
+  max_size: null
+  max_iter: 100

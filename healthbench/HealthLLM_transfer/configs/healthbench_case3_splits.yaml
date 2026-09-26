@@ -1,0 +1,22 @@
+target_fractions:
+  communication:
+    en: 0.05
+    non-en: 0.05
+  complex_responses:
+    en: 0.05
+    non-en: 0.9
+  context_seeking:
+    en: 0.9
+    non-en: 0.9
+  emergency_referrals:
+    en: 0.9
+    non-en: 0.9
+  global_health:
+    en: 0.9
+    non-en: 0.9
+  health_data_tasks:
+    en: 0.9
+    non-en: 0.0
+  hedging:
+    en: 0.05
+    non-en: 0.9
