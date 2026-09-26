@@ -1,64 +1,101 @@
 # CAFE
 
-Core code for the HealthBench experiments and simulation in Figure 3 and Tables 6–9. 
+CAFE estimates a language model's mean evaluation score on a target task
+population using auxiliary scores and a limited number of target labels.
+This repository contains CAFE, comparison methods, and experiment drivers
+for HealthBench and a simulation study of task and evaluator shift.
 
-## Package layout
+Two evaluator settings are supported:
 
-```text
-cafe-code/
-  README.md
-  healthbench/
-    pyproject.toml
-    HealthLLM_transfer/
-      code/covariateshift/   Shared CAFE and baseline estimators
-      code/evaluation/       HealthBench experiment drivers and result collection
-      code/experiment_perp/  Score metadata and source/target split preparation
-      code/representation/  Language labels, embeddings, and PCA
-      configs/              HealthBench experiment definitions
-    src/meta_eval/          Configuration, provenance, and artifact utilities
-  simulation/
-    cafe_sim/               Score generator, experiment driver, and result collection
-    configs/estimators/    Simulation estimator settings
-    data/                  Numeric simulation inputs
-    requirements.txt
-    release_manifest.json
+- **Same evaluator:** auxiliary and target scores use the same evaluator.
+- **Different evaluators:** auxiliary scores come from one evaluator and
+  target labels come from another.
+
+In the code, `B` denotes the auxiliary score and `Y` denotes the target score.
+
+## Getting started
+
+Use Python 3.11 on Linux or macOS. The commands below assume a shell with
+Python and Git available.
+
+Download and extract `cafe-code.zip` from this repository's **Releases**
+section. It contains the code and numeric inputs needed to run the simulation.
+If using a Git clone, copy `simulation/data/` from the release archive into
+the corresponding directory in the clone.
+
+All paths below are relative to the project root, which contains
+`healthbench/` and `simulation/`. Use separate Python environments for the
+two workflows.
+
+## Simulation
+
+### Run a single split
+
+From the project root:
+
+```bash
+cd simulation
+python3.11 -m venv .venv
+. .venv/bin/activate
+python -m pip install -r requirements.txt
+python -m cafe_sim.generator validate
+
+python -m cafe_sim.runner \
+  --setting corr_060 --split 1 --threads 1 --output outputs/simulation
 ```
 
+This command runs all configured methods with 200, 300, and 500 target
+labels for one split. Estimates and standard errors are saved as JSON
+checkpoints under `simulation/outputs/simulation/parts/`.
 
-## Methods and settings
+### Run the full study
 
-| Experiment | Methods |
+From `simulation/`, with the same environment active:
+
+```bash
+python -m cafe_sim.batch local --workers 2 --threads 1 --output outputs/simulation
+python -m cafe_sim.collect status --output outputs/simulation
+python -m cafe_sim.collect collect --output outputs/simulation
+```
+
+The batch command runs four settings over 500 fixed source/target splits.
+`--workers` controls the number of concurrent processes; `--threads` controls
+numerical-library threads per process. Repeating the command with the same
+settings resumes from saved checkpoints.
+
+Collection requires a complete run and writes `raw_results.csv` and
+`raw_results.parquet` under `outputs/simulation/collected/`. The output contains
+31,500 estimates, with method, setting, split, label count, estimate, standard
+error, and evaluation truth recorded for each row.
+
+### Simulation design
+
+The simulation uses 5,000 fixed task representations and scores generated
+from a model fitted to Gemini 3.1 Pro evaluation data. Each split assigns
+1,439 observations to the source and 3,561 to the target. Target-label samples
+are nested across the three label budgets and shared by the methods.
+
+| Setting | Score relationship |
 | --- | --- |
-| Same evaluator | Target-label mean, PPI++, target-only AIPW, pooled-label AIPW, pooled-label DR, CAFE |
-| Different evaluators | Target-label mean, PPI++, RePPI, target-only AIPW, CAFE |
-| HealthBench embedding reweighting | KMM, uLSIF, RuLSIF, KLIEP |
-| HealthBench domain classification | TabPFN density-ratio estimation |
-| HealthBench theme reweighting | Hard themes, predicted-probability KMM, hybrid KMM |
+| `same_evaluator` | Identical auxiliary and target scores |
+| `corr_040` | Auxiliary/target score correlation of 0.4 |
+| `corr_060` | Auxiliary/target score correlation of 0.6 |
+| `corr_080` | Auxiliary/target score correlation of 0.8 |
 
-The label-based estimators use Ridge regression, five outer folds, three
-inner folds, and PC50 prompt-plus-rubric covariates. Code symbols `B` and `Y`
-denote auxiliary and target scores, respectively.
+The correlations refer to the realized simulated dataset. Evaluation truth
+is the target average of the generator's conditional mean; it is used to
+assess estimation error after fitting.
 
-HealthBench uses GPT-4.1 scores for the same-evaluator setting and GPT-4.1
-auxiliary scores with Gemini Flash Lite outcome scores for the
-different-evaluator setting. Its source-reweighting comparison uses PC50
-prompt-plus-rubric KMM and GPT-4.1 scores in both evaluator settings.
+`data/reference.npz` holds covariates, reference scores, and split definitions.
+`data/generator/` holds the fitted generator, and `data/datasets/` holds the
+simulated scores and conditional moments for each setting. Estimator settings
+are in `configs/estimators/`.
 
-The simulation evaluates Gemini 3.1 Pro on four settings, each with 500 fixed
-Case 2 partitions. Conditional oracle moments enter evaluation after fitting.
-
-| Simulation setting | Evaluator relationship |
-| --- | --- |
-| `same_evaluator` | Same evaluator |
-| `corr_040` | Different evaluators, correlation 0.4 |
-| `corr_060` | Different evaluators, correlation 0.6 |
-| `corr_080` | Different evaluators, correlation 0.8 |
-
-## HealthBench
+## HealthBench experiments
 
 ### Installation
 
-Use Python 3.11. Start from `cafe-code/`:
+In a separate shell, start from the project root:
 
 ```bash
 cd healthbench
@@ -71,18 +108,19 @@ export OPENBLAS_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 ```
 
-The following HealthBench commands run from `cafe-code/healthbench/`, except
-where a directory change is shown. Embedding and language preparation also
-require `python -m pip install -e '.[representation]'`.
+The HealthBench estimation runners record the Git revision and require a
+clean checkout with committed source and configurations. If working from the
+release ZIP, initialize a Git repository and commit the project at its root
+before running these experiments.
 
-TabPFN classifiers require a compatible V3 checkpoint. Set its path through
-`TABPFN_CLASSIFIER_CHECKPOINT`; checkpoint access follows the provider's
-license and access terms.
+### Required data
 
-### Inputs
+HealthBench experiments require prepared evaluator scores, split definitions,
+and embeddings. These inputs must be obtained or prepared separately from
+the simulation data. The benchmark and its data documentation are available
+from [HealthBench](https://github.com/openai/healthbench).
 
-Supply the following files under `healthbench/HealthLLM_transfer/data/healthbench/`
-(relative to `cafe-code/`). Research data and checkpoints are supplied separately.
+Place the following files under `healthbench/HealthLLM_transfer/data/healthbench/`:
 
 | File | Required arrays |
 | --- | --- |
@@ -93,28 +131,25 @@ Supply the following files under `healthbench/HealthLLM_transfer/data/healthbenc
 | `embedding/healthbench_bge_m3_pca{30,50,80,95}_embeddings.npz` | `prompt_id`, `prompt_pcs`, `rubric_pcs` |
 
 Score matrices have one row per prompt and one column per model. Split masks
-have one row per split and one column per prompt; `True` selects target
-observations. Inputs are aligned by identifiers. Missing scores follow each
-estimator's model-specific complete-case definition.
+have one row per split and one column per prompt, with `True` marking target
+observations. Prompt and model identifiers align inputs across files.
 
-Split IDs 1–500 correspond to seeds 123–622 in saved order.
-`HealthLLM_transfer/code/experiment_perp/generate_splits.py` generates these
-500 splits. Preparation utilities are under `HealthLLM_transfer/code/`.
-Each PCA block is fitted separately to pooled prompt or rubric embeddings.
+The CAFE comparisons use the PC50 prompt-plus-rubric representation
+(80 features). The reweighting comparisons also use the other representation
+levels listed above. Preparation utilities are in
+`HealthLLM_transfer/code/experiment_perp/` and
+`HealthLLM_transfer/code/representation/`. Embedding and language preparation
+require the additional dependencies installed by
+`python -m pip install -e '.[representation]'`.
 
-| Representation | Prompt dimensions | Prompt + rubric dimensions |
-| --- | ---: | ---: |
-| PC30 | 20 | 28 |
-| PC50 | 58 | 80 |
-| PC80 | 191 | 300 |
-| PC95 | 377 | 662 |
-| Full | 1024 | 2048 |
+### Run CAFE and the comparison methods
 
-### CAFE and baseline estimation
+The same-evaluator experiment uses GPT-4.1 scores. The different-evaluator
+experiment uses GPT-4.1 auxiliary scores and Gemini Flash Lite target scores.
+Both configurations run three task-shift cases: Cases 1 and 2 vary theme
+proportions, while Case 3 varies theme and language proportions.
 
-Run from a clean Git checkout after installing dependencies and committing
-the source and configurations. Run identity covers the committed code,
-configuration, inputs, and dependency versions.
+From `healthbench/`, run either experiment:
 
 ```bash
 python HealthLLM_transfer/code/evaluation/run_transport_batch.py \
@@ -126,18 +161,19 @@ python HealthLLM_transfer/code/evaluation/run_transport_pairedscore_batch.py \
   --config HealthLLM_transfer/configs/healthbench_transport_paired_flashlite_ridge_fixed_labels.yaml
 ```
 
-Each command runs Cases 1–3 and writes estimates, diagnostics, configuration,
-and provenance under `HealthLLM_transfer/artifacts/runs/<run_id>/`.
-Successful runs are reused; partial runs resume from saved split results.
-The same computation supports `--mode prepare`,
-`--mode batch --run-dir ... --batch-id ...`, and
-`--mode finalize --run-dir ...`.
+Each configuration uses 500 splits, nested target-label budgets of 200, 300,
+and 500, Ridge regression, and five-fold outer cross-fitting. Estimates,
+standard errors, diagnostics, and run metadata are saved under
+`HealthLLM_transfer/artifacts/runs/<run_id>/`. Completed runs are reused;
+interrupted runs resume from saved split results.
 
 ### Covariate reweighting
 
-The four workflow configurations select Cases 1–3, 500 splits, and
-prompt/prompt-plus-rubric inputs at all five representation levels.
-From `cafe-code/healthbench/`:
+The reweighting workflows estimate target scores by weighting source
+observations using embeddings, domain classification, or task themes.
+The examples below each run one batch for Case 1.
+
+From `healthbench/`:
 
 ```bash
 cd HealthLLM_transfer
@@ -151,83 +187,59 @@ python code/evaluation/predicted_theme_reweighting.py \
   --mode batch --case case1 --task-id 0
 python code/evaluation/predicted_theme_plus_embedding_reweighting.py \
   --mode batch --case case1 --task-id 0
-
-cd ..
 ```
 
-Kernel batch IDs are 0–19 per case, method, and feature set. Classifier task
-IDs are 0–199 per case: ten feature sets times twenty batches, in configuration
-order. After all batches for a case finish, collect kernel outputs with
-`kernel_reweighting.py --case case1 --finalize-case`, or use the corresponding
-classifier workflow with `--mode finalize --case case1`. Weight and score
-NPZ files are written to the configured paths.
+For the TabPFN domain classifier, set `TABPFN_CLASSIFIER_CHECKPOINT` to a
+compatible V3 checkpoint obtained under the provider's access terms.
 
-Hybrid KMM uses `scorer_bandwidth: target_mean_distance` for the ADAPT J-score.
-Embedding and probability KMM use the median-based kernel gamma.
-`calculate_baseline.py` computes unweighted source means; `calculate_oracle.py`
-computes scores from supplied oracle weights. `selection_design_raw_weights`
-and `calculate_oracle_case` calculate oracle weights and scores from the
-configured theme or theme-language allocation fractions.
+Workflow settings are in `HealthLLM_transfer/configs/`. Kernel batch IDs
+range from 0 to 19 for each case, method, and feature set. Classifier task IDs
+range from 0 to 199 per case, covering ten feature sets and twenty batches.
+After all configured batches are complete, collect kernel results with
+`kernel_reweighting.py --case case1 --finalize-case`, or collect classifier
+results with the corresponding script's `--mode finalize --case case1` option.
+Weights and reweighted scores are saved to the paths in the configuration.
 
-## Simulation
+## Included methods
 
-### Installation and inputs
+| Experiment | Methods |
+| --- | --- |
+| Same evaluator | Target-label mean, PPI++, target-only AIPW, pooled-label AIPW, pooled-label DR, CAFE |
+| Different evaluators | Target-label mean, PPI++, RePPI, target-only AIPW, CAFE |
+| Embedding reweighting | KMM, uLSIF, RuLSIF, KLIEP |
+| Domain classification | TabPFN density-ratio estimation |
+| Theme reweighting | Hard themes, predicted-probability KMM, hybrid KMM |
 
-Use a separate Python environment. In a separate shell, start from `cafe-code/`:
+AIPW denotes augmented inverse-probability weighting, and DR denotes
+doubly robust estimation. CAFE is identified as `cafe` in configurations and
+result tables.
 
-```bash
-cd simulation
-python3.11 -m venv .venv
-. .venv/bin/activate
-python -m pip install -r requirements.txt
-python -m cafe_sim.generator validate
+## Repository structure
+
+```text
+healthbench/
+  HealthLLM_transfer/
+    code/                 Estimators, data preparation, and experiment drivers
+    configs/              HealthBench experiment settings
+  src/meta_eval/          Configuration and result-management utilities
+  pyproject.toml
+simulation/
+  cafe_sim/               Simulation generation, execution, and collection
+  configs/estimators/     Simulation estimator settings
+  data/                  Numeric inputs supplied in the release archive
+  requirements.txt
+  release_manifest.json
 ```
 
-All remaining simulation commands run from `cafe-code/simulation/`.
-Python 3.11 and 3.12 are supported.
+`MANIFEST.json` lists the release contents. `simulation/release_manifest.json`
+records checksums for simulation inputs and required source files.
 
-`data/reference.npz` contains numeric covariates, evaluator scores, and split
-IDs 1–500: `split_seeds` has 500 entries and `target_masks` has shape
-`(500, 5000)`, with one row per split and one column per observation.
-`data/settings.json` specifies the four settings.
-`data/generator/` contains the fitted score generator and conditional moments;
-`data/datasets/` contains fixed simulated scores and evaluation truth.
-These numeric inputs are included in the package and excluded from Git.
+## Data and references
 
-### Computation and collection
-
-Run one setting and split:
-
-```bash
-python -m cafe_sim.runner \
-  --setting corr_060 --split 1 --threads 1 --output outputs/simulation
-```
-
-Run all four settings and 500 splits with two local workers:
-
-```bash
-python -m cafe_sim.batch local --workers 2 --threads 1 --output outputs/simulation
-python -m cafe_sim.collect status --output outputs/simulation
-python -m cafe_sim.collect collect --output outputs/simulation
-```
-
-Checkpoints resume within the same code, input, and runtime identity.
-Collection validates every requested method and label budget before exporting
-numeric estimates. A complete run contains 31,500 rows.
-
-`cafe_sim/generator.py` provides `validate`, `refit`, and `regenerate` commands.
-`configs/estimators/` defines the simulation settings for the shared estimators.
-
-## File inventory and sources
-
-`MANIFEST.json` lists the distributed files. The simulation release manifest
-records simulation inputs and source files plus shared estimator dependencies;
-its paths are relative to `cafe-code/`. Numerical NPZ inputs are excluded from
-Git by `.gitignore`.
-
-The included numeric task representations and evaluation scores derive from
-[HealthBench](https://github.com/openai/healthbench), described by Arora et al.
-They contain no prompt or rubric text. The RePPI scalar-mean implementation
-follows Ji, Lei and Zrnic (2025), with the upstream reference at
-[RePPI](https://github.com/Wenlong2000/RePPI). Dependencies retain their
-respective licenses.
+The task representations and reference evaluation scores derive from
+[HealthBench](https://github.com/openai/healthbench). The simulation archive
+contains numeric arrays without prompt or rubric text. The RePPI scalar-mean
+implementation follows Ji, Lei, and Zrnic (2025); see the
+[RePPI repository](https://github.com/Wenlong2000/RePPI).
+Third-party data, models, and dependencies remain subject to their respective
+licenses and access terms.
