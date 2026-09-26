@@ -19,9 +19,10 @@ Use Python 3.11 on Linux or macOS. The commands below assume a shell with
 Python and Git available.
 
 Download and extract `cafe-code.zip` from this repository's **Releases**
-section. It contains the code and numeric inputs needed to run the simulation.
-If using a Git clone, copy `simulation/data/` from the release archive into
-the corresponding directory in the clone.
+section. It contains the code and numeric inputs for both the simulation
+and HealthBench experiments. If using a Git clone, copy `simulation/data/`
+and `healthbench/HealthLLM_transfer/data/` from the release archive into the
+corresponding directories in the clone.
 
 All paths below are relative to the project root, which contains
 `healthbench/` and `simulation/`. Use separate Python environments for the
@@ -115,12 +116,12 @@ before running these experiments.
 
 ### Required data
 
-HealthBench experiments require prepared evaluator scores, split definitions,
-and embeddings. These inputs must be obtained or prepared separately from
-the simulation data. The benchmark and its data documentation are available
-from [HealthBench](https://github.com/openai/healthbench).
+The release archive includes GPT-4.1 and Gemini Flash Lite evaluator scores,
+500 source/target splits for each of the three cases, full BGE-M3 embeddings,
+and PC30, PC50, PC80, and PC95 representations. The benchmark and its data
+documentation are available from [HealthBench](https://github.com/openai/healthbench).
 
-Place the following files under `healthbench/HealthLLM_transfer/data/healthbench/`:
+The files are located under `healthbench/HealthLLM_transfer/data/healthbench/`:
 
 | File | Required arrays |
 | --- | --- |
@@ -132,7 +133,10 @@ Place the following files under `healthbench/HealthLLM_transfer/data/healthbench
 
 Score matrices have one row per prompt and one column per model. Split masks
 have one row per split and one column per prompt, with `True` marking target
-observations. Prompt and model identifiers align inputs across files.
+observations. Prompt identifiers are package-local labels of the form
+`task_00001`; the same labels align scores, embeddings, and split masks.
+Missing evaluator scores are stored as `NaN` and handled by each method's
+complete-case rules.
 
 The CAFE comparisons use the PC50 prompt-plus-rubric representation
 (80 features). The reweighting comparisons also use the other representation
@@ -231,13 +235,15 @@ simulation/
   release_manifest.json
 ```
 
-`MANIFEST.json` lists the release contents. `simulation/release_manifest.json`
-records checksums for simulation inputs and required source files.
+`MANIFEST.json` lists the release contents. `healthbench/MANIFEST.json` records
+HealthBench data checksums and source information.
+`simulation/release_manifest.json` records checksums for simulation inputs
+and required source files.
 
 ## Data sources
 
 The task representations and reference evaluation scores derive from
-[HealthBench](https://github.com/openai/healthbench). The simulation archive
-contains numeric arrays without prompt or rubric text.
+[HealthBench](https://github.com/openai/healthbench). The release archive
+contains numeric representations and scores without prompt or rubric text.
 Third-party data, models, and dependencies remain subject to their respective
 licenses and access terms.

@@ -1,4 +1,52 @@
 {
+  "data": {
+    "files": {
+      "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_embeddings.npz": {
+        "sha256": "cc35977f291a23f4d5111f424c678005bd185d9b9551b4131c56aa48e11aac1d",
+        "size_bytes": 38054614
+      },
+      "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_pca30_embeddings.npz": {
+        "sha256": "a64223e4a6f9002441039b1448a1df4fa32c232cfc7112e92925782ce97c1dfd",
+        "size_bytes": 577446
+      },
+      "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_pca50_embeddings.npz": {
+        "sha256": "9f2a1aaf24b27db3b450469e059de07c76454fd79bc13c4a89136341a21ede5e",
+        "size_bytes": 1536242
+      },
+      "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_pca80_embeddings.npz": {
+        "sha256": "4c1836552739a4ff468cb47968ff603ee6b508d166a32990eaa2d35350c9166e",
+        "size_bytes": 5593652
+      },
+      "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_pca95_embeddings.npz": {
+        "sha256": "eda267037b5e4af989c82ad463b7cba30f037905d92c8d7c8972c078afa25014",
+        "size_bytes": 12250733
+      },
+      "HealthLLM_transfer/data/healthbench/embedding/healthbench_splits.npz": {
+        "sha256": "b88ff007a19a09c86a5f5424f561f39808b9944682773e3f5874dbdad3e035d2",
+        "size_bytes": 1190981
+      },
+      "HealthLLM_transfer/data/healthbench/healthbench_metadata_flashlite.npz": {
+        "sha256": "9b4f2242e8db8ce7d0f295ac183ff29bf5b2cfea8cb14fd393d930a6ff24c54e",
+        "size_bytes": 76383
+      },
+      "HealthLLM_transfer/data/healthbench/healthbench_metadata_gpt4.1.npz": {
+        "sha256": "ffbb56f4efae46d4a89853b228a6ed748df1244e40e5b5fb68510f1de018c424",
+        "size_bytes": 76350
+      }
+    },
+    "retrieval": "Extract cafe-code.zip from the repository Releases page.",
+    "sample_count": 5000,
+    "sample_id_format": "task_00001 through task_05000",
+    "source": {
+      "license": "MIT",
+      "name": "HealthBench",
+      "url": "https://github.com/openai/healthbench"
+    },
+    "split_ids": {
+      "first": 1,
+      "last": 500
+    }
+  },
   "files": [
     ".gitignore",
     "HealthLLM_transfer/code/covariateshift/RePPI.py",
@@ -42,6 +90,14 @@
     "HealthLLM_transfer/configs/healthbench_predicted_theme_reweighting.yaml",
     "HealthLLM_transfer/configs/healthbench_transport_b_equals_y.yaml",
     "HealthLLM_transfer/configs/healthbench_transport_paired_flashlite_ridge_fixed_labels.yaml",
+    "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_embeddings.npz",
+    "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_pca30_embeddings.npz",
+    "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_pca50_embeddings.npz",
+    "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_pca80_embeddings.npz",
+    "HealthLLM_transfer/data/healthbench/embedding/healthbench_bge_m3_pca95_embeddings.npz",
+    "HealthLLM_transfer/data/healthbench/embedding/healthbench_splits.npz",
+    "HealthLLM_transfer/data/healthbench/healthbench_metadata_flashlite.npz",
+    "HealthLLM_transfer/data/healthbench/healthbench_metadata_gpt4.1.npz",
     "MANIFEST.json",
     "pyproject.toml",
     "src/meta_eval/__init__.py",
