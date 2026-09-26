@@ -1,11 +1,6 @@
 # CAFE
 
-Core code for the ICLR HealthBench experiments and simulation in Figure 3
-and Tables 6–9. Both use split IDs **1–500** and nested target-label budgets
-of **200, 300, and 500**.
-
-The complete package is available as `cafe-code.zip` on the repository's
-Releases page and includes the numeric simulation inputs.
+Core code for the HealthBench experiments and simulation in Figure 3 and Tables 6–9. 
 
 ## Package layout
 
@@ -24,18 +19,11 @@ cafe-code/
   simulation/
     cafe_sim/               Score generator, experiment driver, and result collection
     configs/estimators/    Simulation estimator settings
-    data/                  Anonymous numeric simulation inputs
+    data/                  Numeric simulation inputs
     requirements.txt
     release_manifest.json
 ```
 
-HealthBench and simulation import the same estimators from
-`healthbench/HealthLLM_transfer/code/`. Keep both directories together.
-`cafe_transport.py` is the same-evaluator CAFE entry point;
-`cafe_pairedscore.py` is the different-evaluator entry point. The corresponding
-`_inference.py` modules calculate estimates and standard errors from fitted
-predictions and coefficients. The estimator identifier in configurations and
-outputs is `cafe`.
 
 ## Methods and settings
 
