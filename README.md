@@ -18,9 +18,9 @@ In the code, `B` denotes the auxiliary score and `Y` denotes the target score.
 Use Python 3.11 on Linux or macOS. The commands below assume a shell with
 Python and Git available.
 
-Clone the repository's `main` branch, or download and extract `cafe-code.zip`
-from **Releases**. Both contain the code and numeric inputs for the simulation
-and HealthBench experiments. Data are in `simulation/data/` and
+Click **Download full repository as ZIP** on this page, then extract the
+archive. It contains the code and numeric inputs for the simulation and
+HealthBench experiments. Data are in `simulation/data/` and
 `healthbench/HealthLLM_transfer/data/`.
 
 All paths below are relative to the project root, which contains
@@ -108,10 +108,10 @@ export OPENBLAS_NUM_THREADS=1
 export NUMEXPR_NUM_THREADS=1
 ```
 
-The HealthBench estimation runners record the Git revision and require a
-clean checkout with committed source and configurations. If working from the
-release ZIP, initialize a Git repository and commit the project at its root
-before running these experiments.
+The HealthBench estimation runners record the local Git revision and require
+committed source and configurations. After extracting the ZIP, initialize a
+local Git repository and commit the project at its root before running these
+experiments.
 
 ### Required data
 

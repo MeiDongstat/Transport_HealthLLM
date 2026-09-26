@@ -34,7 +34,7 @@
         "size_bytes": 76350
       }
     },
-    "retrieval": "Included in the main branch and in cafe-code.zip from Releases.",
+    "retrieval": "Click Download full repository as ZIP on this page and extract the archive.",
     "sample_count": 5000,
     "sample_id_format": "task_00001 through task_05000",
     "source": {
