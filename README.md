@@ -117,8 +117,7 @@ experiments.
 
 The repository includes GPT-4.1 and Gemini Flash Lite evaluator scores,
 500 source/target splits for each of the three cases, full BGE-M3 embeddings,
-and PC30, PC50, PC80, and PC95 representations. The benchmark and its data
-documentation are available from [HealthBench](https://github.com/openai/healthbench).
+and PC30, PC50, PC80, and PC95 representations. 
 
 The files are located under `healthbench/HealthLLM_transfer/data/healthbench/`:
 
@@ -269,10 +268,3 @@ HealthBench data checksums and source information.
 `simulation/release_manifest.json` records checksums for simulation inputs
 and required source files.
 
-## Data sources
-
-The task representations and reference evaluation scores derive from
-[HealthBench](https://github.com/openai/healthbench). The repository
-contains numeric representations and scores without prompt or rubric text.
-Third-party data, models, and dependencies remain subject to their respective
-licenses and access terms.
